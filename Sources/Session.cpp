@@ -1,10 +1,11 @@
 #include "Session.h"
 #include "Events.h"
+#include "Connection.hpp"
 #include <iostream>
 
 Session::Session()
-: m_Opened(true), m_Connection(false), m_UserName(20, '\0'), m_Handler() {
-    // TODO open connection
+: m_Opened(true), m_Connection(false), m_Sockfd(-1), m_UserName(20, '\0'), m_Handler() {
+    m_Sockfd = Connection::OpenConnection("3.8.116.10", 8080, AF_INET);
     m_Handler.AddCommand("login",(Event*) new Login(this));
     m_Handler.AddCommand("register",(Event*) new Register(this));
     m_Handler.AddCommand("logout",(Event*) new Logout(this));
@@ -26,7 +27,7 @@ void Session::MainPoint() {
 }
 
 Session::~Session() {
-    // TODO close connection
+    Connection::CloseConnection(m_Sockfd);
 }
 
 bool Session::IsConnected() const {
@@ -51,4 +52,8 @@ bool Session::IsOpen() const {
 
 void Session::SetOpened(bool mOpened) {
     m_Opened = mOpened;
+}
+
+int Session::GetSockfd() const {
+    return m_Sockfd;
 }

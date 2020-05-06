@@ -5,6 +5,11 @@ class Session {
 private:
     bool m_Opened;
     bool m_Connection;
+    int m_Sockfd;
+public:
+    int GetSockfd() const;
+
+private:
     std::string m_UserName;
     Handler m_Handler;
 public:

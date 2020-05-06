@@ -12,8 +12,8 @@ include_directories(./Headers)
 include_directories(./Headers/Events)
 
 add_executable(main
-        External/laborator10/buffer.c
-        External/laborator10/helpers.c
+        External/laborator10/buffer.cpp
+        External/laborator10/helpers.cpp
         Sources/main.cpp
         Sources/Session.cpp
         Sources/HttpRequest.cpp

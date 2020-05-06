@@ -24,7 +24,7 @@ public:
 
     void ClearCookies();
 
-    void Send();
+    void Send(int sockfd);
 };
 
 
