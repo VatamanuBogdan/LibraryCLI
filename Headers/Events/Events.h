@@ -4,5 +4,7 @@
 #include "EnterLibrary.h"
 #include "GetBooks.h"
 #include "GetBook.h"
+#include "DeleteBook.h"
+#include "AddBook.h"
 #include "Logout.h"
 #include "Exit.h"
