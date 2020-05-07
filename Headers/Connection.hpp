@@ -23,8 +23,9 @@ public:
         return sockfd;
     }
 
-    static void CloseConnection(int sockfd) {
+    static void CloseConnection(int &sockfd) {
         close(sockfd);
+        sockfd = -1;
     }
 
     static void SendData(int sockfd, const std::string &Buffer) {
@@ -46,6 +47,7 @@ public:
 
     static std::string ReceiveHttps(int sockfd) {
         std::string result = "", piece(256,'\0');
+        result.reserve(2000);
         int bytes, dataStart;
         while(true) {
             bytes = recv(sockfd, (void *) piece.data(), 256, 0);
@@ -65,7 +67,6 @@ public:
             }
         }
         int posStart, posEnd;
-        //std::cout << result << std::endl;
         if ((posStart = result.find("Content-Length")) == std::string::npos) {
             return result;
         }
@@ -78,6 +79,14 @@ public:
         int remainedBytes = contentLength - (result.length() - dataStart);
         while (remainedBytes != 0) {
             bytes = recv(sockfd, (void *) piece.data(), 256, 0);
+            if (bytes < 0) {
+                std::cerr << "[Error]::Receive problem" << std::endl;
+                exit(-1);
+            }
+            else if (bytes == 0) {
+                std::cout << "Connection close" << std::endl;
+                return "";
+            }
             piece.resize(bytes);
             result.append(piece);
             remainedBytes -= bytes;

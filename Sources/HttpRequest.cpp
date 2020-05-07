@@ -37,13 +37,6 @@ void HttpRequest::ClearHeaders() {
 }
 
 void HttpRequest::Send(int sockfd) {
-    /*
-    std::cout << m_RequestType;
-    std::cout << m_Host;
-    std::cout << m_Headers;
-    std::cout << m_Cookies;
-    std::cout << m_Data;*/
-    //std::cout << std::endl;
     Connection::SendData(sockfd, m_RequestType);
     Connection::SendData(sockfd, m_Host);
     Connection::SendData(sockfd, m_Headers);

@@ -11,13 +11,25 @@ public:
 
 private:
     std::string m_UserName;
+    std::string m_ConnectSid;
+    std::string m_Token;
+public:
+    const std::string &GetToken() const;
+
+    void SetToken(const std::string &mToken);
+
+private:
     Handler m_Handler;
 public:
     bool IsConnected() const;
 
     void SetConnection(bool mConnection);
 
-    bool IsOpen() const;
+    const std::string &GetConnectSid() const;
+
+    void SetConnectSid(const std::string &mConnectSid);
+
+    bool IsOpened() const;
 
     void SetOpened(bool mOpened);
 

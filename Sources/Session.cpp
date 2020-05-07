@@ -4,8 +4,7 @@
 #include <iostream>
 
 Session::Session()
-: m_Opened(true), m_Connection(false), m_Sockfd(-1), m_UserName(20, '\0'), m_Handler() {
-    m_Sockfd = Connection::OpenConnection("3.8.116.10", 8080, AF_INET);
+: m_Opened(true), m_Connection(false), m_Sockfd(-1), m_UserName(""), m_ConnectSid(""), m_Token("") , m_Handler() {
     m_Handler.AddCommand("login",(Event*) new Login(this));
     m_Handler.AddCommand("register",(Event*) new Register(this));
     m_Handler.AddCommand("logout",(Event*) new Logout(this));
@@ -20,9 +19,13 @@ Session::Session()
 void Session::MainPoint() {
     std::string command(20, '\0');
     std::stringstream ss;
-    while (m_Opened) {
+    while (IsOpened()) {
+        m_Sockfd = Connection::OpenConnection("3.8.116.10", 8080, AF_INET);
         std::getline(std::cin, command);
-        m_Handler.RunCommand(command, ss);
+        if(!m_Handler.RunCommand(command, ss)) {
+            std::cout << "Command: " << command << " doesn't exists" << std::endl;
+        }
+        Connection::CloseConnection(m_Sockfd);
     }
 }
 
@@ -46,7 +49,7 @@ void Session::SetUserName(const std::string &mUserName) {
     m_UserName = mUserName;
 }
 
-bool Session::IsOpen() const {
+bool Session::IsOpened() const {
     return m_Opened;
 }
 
@@ -56,4 +59,20 @@ void Session::SetOpened(bool mOpened) {
 
 int Session::GetSockfd() const {
     return m_Sockfd;
+}
+
+const std::string &Session::GetConnectSid() const {
+    return m_ConnectSid;
+}
+
+void Session::SetConnectSid(const std::string &mConnectSid) {
+    m_ConnectSid = mConnectSid;
+}
+
+const std::string &Session::GetToken() const {
+    return m_Token;
+}
+
+void Session::SetToken(const std::string &mToken) {
+    m_Token = mToken;
 }

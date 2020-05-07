@@ -2,7 +2,7 @@
 #include "json.hpp"
 #include <string>
 #include <iostream>
-#include "helpers.h"
+#include "HttpReply.hpp"
 #include "Connection.hpp"
 
 using json=nlohmann::json;
@@ -13,7 +13,11 @@ Register::Register(Session *m_Owner)
 
 void Register::operator()(std::stringstream &stream) {
     using namespace std;
-    HttpRequest m_Request;
+    if (m_Owner->IsConnected()) {
+        cout << "You are already connected as " << m_Owner->GetUserName() << endl;
+        cout << "Please logout to proceed this command" << endl;
+        return;
+    }
     static string username(20, '\0'), password(20, '\0');
     cout << "username: "    ,   getline(cin, username);
     cout << "password: "    ,   getline(cin, password);
@@ -30,6 +34,12 @@ void Register::operator()(std::stringstream &stream) {
     m_Request.ClearCookies();
     m_Request.SetData(data.c_str());
     m_Request.Send(m_Owner->GetSockfd());
-    //std::cout << receive_from_server(m_Owner->GetSockfd());
-    std::cout << Connection::ReceiveHttps(m_Owner->GetSockfd()) << std::endl;
+    std::string reply = Connection::ReceiveHttps(m_Owner->GetSockfd());
+    unsigned short sign = HttpReply::ExtractSign(reply);
+    if (sign == 201) {
+        cout << "Account was created" << std::endl;
+    }
+    else {
+        cout << "Register failed " << "error " << sign << std::endl;
+    }
 }
