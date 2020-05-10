@@ -6,5 +6,5 @@ class Logout : public Event {
 public:
     explicit Logout(Session* m_Owner);
 
-    void operator()(std::stringstream& stream) override;
+    void operator()() override;
 };

@@ -1,4 +1,4 @@
-#include "Events/GetBooks.h"
+#include "GetBooks.h"
 #include "HttpReply.hpp"
 #include "Connection.hpp"
 #include "json.hpp"
@@ -8,11 +8,15 @@ GetBooks::GetBooks(Session *m_Owner)
 : Event(m_Owner) {
 }
 
-void GetBooks::operator()(std::stringstream &stream) {
+void GetBooks::operator()() {
     using namespace std;
-    if (!m_Owner->IsConnected() && !m_Owner->GetToken().empty()) {
+    if (!m_Owner->IsConnected()) {
         cout << "You are not connected" << endl;
         cout << "Please login to proceed this command" << endl;
+        return;
+    }
+    else if (m_Owner->GetToken().empty()) {
+        cout << "To proceed this command you need library access" << endl;
         return;
     }
     m_Request.SetRequest("GET", "/api/v1/tema/library/books", "HTTP/1.1");
@@ -23,14 +27,19 @@ void GetBooks::operator()(std::stringstream &stream) {
     m_Request.ClearCookies();
     m_Request.AddCookie("connect.sid", m_Owner->GetConnectSid().c_str());
     m_Request.SetData("");
-    m_Request.Send(m_Owner->GetSockfd());
-    std::string reply = Connection::ReceiveHttps(m_Owner->GetSockfd());
+    m_Owner->OpenConnection();
+    m_Request.Send(*m_Owner);
+    std::string reply = Connection::ReceiveHttps(*m_Owner);
+    m_Owner->CloseConnection();
     unsigned short sign = HttpReply::ExtractSign(reply);
     if (sign == 200) {
         json Json;
-        // TODO print data nicer
         HttpReply::ExtractData(reply, Json);
-        std::cout << Json << std::endl;
+        for (auto & iter : Json) {
+            cout << "Id: " << iter["id"] << endl;
+            cout << "Title: " << iter["title"] << endl;
+            cout << endl;
+        }
     }
     else {
         cout << "Get books failed " << "error " << sign << std::endl;

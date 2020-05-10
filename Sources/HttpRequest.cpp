@@ -1,9 +1,10 @@
 #include "HttpRequest.h"
 #include "Connection.hpp"
-#include <iostream>
 
-void HttpRequest::SetRequest(const char *type, const char *path, const char *version) {
+void HttpRequest::SetRequest(const char *type, const char *path, const char *version, const char* queryParam) {
     (m_RequestType = type).append(" ").append(path).append(" ").append(version).append("\r\n");
+    if (strlen(queryParam) != 0)
+        m_RequestType.append("?").append(queryParam);
 }
 
 void HttpRequest::SetHost(const char *host) {
@@ -36,10 +37,10 @@ void HttpRequest::ClearHeaders() {
     m_Headers = "";
 }
 
-void HttpRequest::Send(int sockfd) {
-    Connection::SendData(sockfd, m_RequestType);
-    Connection::SendData(sockfd, m_Host);
-    Connection::SendData(sockfd, m_Headers);
-    Connection::SendData(sockfd, m_Cookies);
-    Connection::SendData(sockfd, m_Data);
+void HttpRequest::Send(Session& session) {
+    Connection::SendData(session, m_RequestType);
+    Connection::SendData(session, m_Host);
+    Connection::SendData(session, m_Headers);
+    Connection::SendData(session, m_Cookies);
+    Connection::SendData(session, m_Data);
 }

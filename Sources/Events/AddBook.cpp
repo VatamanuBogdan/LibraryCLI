@@ -3,35 +3,48 @@
 #include "Connection.hpp"
 #include "json.hpp"
 #include <iostream>
+#include <exception>
 
 AddBook::AddBook(Session *m_Owner)
 : Event(m_Owner) {
 }
 
-void AddBook::operator()(std::stringstream &stream) {
+void AddBook::operator()() {
     using namespace std;
-    if (!m_Owner->IsConnected() && !m_Owner->GetToken().empty()) {
+    if (!m_Owner->IsConnected()) {
         cout << "You are not connected" << endl;
         cout << "Please login to proceed this command" << endl;
         return;
     }
-    string title, author, genre, publisher;
-    int page_count;
+    else if (m_Owner->GetToken().empty()) {
+        cout << "To proceed this command you need library access" << endl;
+        return;
+    }
+    string title, author, genre, publisher, s_pageCount;
     cout << "title="    ,   getline(cin, title);
     cout << "author="   ,   getline(cin, author);
     cout << "genre="    ,   getline(cin, genre);
     cout << "publisher="    ,   getline(cin, publisher);
-    cout << "page_count="    ,   cin >> page_count;
-    if (page_count <= 0) {
-        cout << "page_count invalid value" << endl;
+    cout << "page_count="    ,   getline(cin, s_pageCount);
+    unsigned int pageCount;
+    size_t charNum;
+    if (s_pageCount[0] == '-' || s_pageCount.size() > 6) {
+        cout << "Page count value is invalid" << endl;
+        return;
+    }
+    try {
+        pageCount = stoi(s_pageCount, &charNum);
+    }
+    catch (exception& e) {
+        std::cout << "Page count value is invalid"  << std::endl;
         return;
     }
     json dataContent;
     dataContent["title"] = title    ,   dataContent["author"] = author;
     dataContent["genre"] = genre    ,   dataContent["publisher"] = publisher;
-    dataContent["page_count"] = page_count;
+    dataContent["page_count"] = pageCount;
     string data = dataContent.dump();
-
+    cout << endl;
     m_Request.SetRequest("POST", "/api/v1/tema/library/books", "HTTP/1.1");
     m_Request.SetHost("ec2-3-8-116-10.eu-west-2.compute.amazonaws.com:8080");
     m_Request.ClearHeaders();
@@ -42,10 +55,11 @@ void AddBook::operator()(std::stringstream &stream) {
     m_Request.ClearCookies();
     m_Request.AddCookie("connect.sid", m_Owner->GetConnectSid().c_str());
     m_Request.SetData(data.c_str());
-    m_Request.Send(m_Owner->GetSockfd());
-    std::string reply = Connection::ReceiveHttps(m_Owner->GetSockfd());
+    m_Owner->OpenConnection();
+    m_Request.Send(*m_Owner);
+    std::string reply = Connection::ReceiveHttps(*m_Owner);
+    m_Owner->CloseConnection();
     unsigned short sign = HttpReply::ExtractSign(reply);
-    std::cout << reply << std::endl;
     if (sign == 200) {
         cout << "Add book succeed" << endl;
     }

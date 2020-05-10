@@ -16,21 +16,28 @@ Session::Session()
     m_Handler.AddCommand("exit",(Event*) new Exit(this));
 }
 
-void Session::MainPoint() {
-    std::string command(20, '\0');
-    std::stringstream ss;
-    while (IsOpened()) {
-        m_Sockfd = Connection::OpenConnection("3.8.116.10", 8080, AF_INET);
-        std::getline(std::cin, command);
-        if(!m_Handler.RunCommand(command, ss)) {
-            std::cout << "Command: " << command << " doesn't exists" << std::endl;
-        }
+void Session::OpenConnection() {
+    m_Sockfd = Connection::OpenConnection("3.8.116.10", 8080, AF_INET);
+}
+
+void Session::CloseConnection() {
+    if (m_Sockfd != -1) {
         Connection::CloseConnection(m_Sockfd);
     }
 }
 
+void Session::MainPoint() {
+    std::string command(20, '\0');
+    while (IsOpened()) {
+        std::getline(std::cin, command);
+        if(!m_Handler.RunCommand(command)) {
+            std::cout << "Command: " << command << " doesn't exists" << std::endl;
+        }
+    }
+}
+
 Session::~Session() {
-    Connection::CloseConnection(m_Sockfd);
+    CloseConnection();
 }
 
 bool Session::IsConnected() const {

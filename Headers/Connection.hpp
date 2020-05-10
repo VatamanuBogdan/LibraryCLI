@@ -1,4 +1,5 @@
 #pragma once
+#include "Session.h"
 #include <string>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -28,38 +29,38 @@ public:
         sockfd = -1;
     }
 
-    static void SendData(int sockfd, const std::string &Buffer) {
+    static void SendData(Session& session, const std::string &Buffer) {
         int sent = 0, total = Buffer.size(), bytes;
         const char* data = Buffer.data();
         while (total != 0) {
-            bytes = send(sockfd,  (void*) (data + sent), total, 0);
+            bytes = send(session.GetSockfd(),  (void*) (data + sent), total, 0);
             if (bytes < 0) {
                 std::cerr << "[Error]::Send problem" << std::endl;
                 exit(-1);
             }
             else if (bytes == 0) {
-                std::cout << "Connection closed" << std::endl;
+                std::cerr << "[Error]::Connection was closed while sending data" << std::endl;
                 return;
             }
             total -= bytes  ,   sent += bytes;
         }
     }
 
-    static std::string ReceiveHttps(int sockfd) {
+    static std::string ReceiveHttps(Session& session) {
         std::string result = "", piece(256,'\0');
         result.reserve(2000);
         int bytes, dataStart;
         while(true) {
-            bytes = recv(sockfd, (void *) piece.data(), 256, 0);
-            piece.resize(bytes);
+            bytes = recv(session.GetSockfd(), (void *) piece.data(), 256, 0);
             if (bytes < 0) {
                 std::cerr << "[Error]::Receive problem" << std::endl;
                 exit(-1);
             }
             else if (bytes == 0) {
-                std::cout << "Connection close" << std::endl;
+                std::cerr << "[Error]::Connection was closed while receiving data" << std::endl;
                 return "";
             }
+            piece.resize(bytes);
             result.append(piece);
             if ((dataStart = result.rfind("\r\n\r\n")) != std::string::npos) {
                 dataStart += 4;
@@ -78,13 +79,13 @@ public:
         int contentLength = std::stoi(result.substr(posStart, posEnd - posStart));
         int remainedBytes = contentLength - (result.length() - dataStart);
         while (remainedBytes != 0) {
-            bytes = recv(sockfd, (void *) piece.data(), 256, 0);
+            bytes = recv(session.GetSockfd(), (void *) piece.data(), 256, 0);
             if (bytes < 0) {
                 std::cerr << "[Error]::Receive problem" << std::endl;
                 exit(-1);
             }
             else if (bytes == 0) {
-                std::cout << "Connection close" << std::endl;
+                std::cerr << "[Error]::Connection was closed while receiving data" << std::endl;
                 return "";
             }
             piece.resize(bytes);

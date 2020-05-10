@@ -16,11 +16,11 @@ private:
 
 public:
     /*
-     * @event take his custody
+     * @event object take his custody
      */
     void AddCommand(const std::string& command, Event* event);
 
-    bool RunCommand(const std::string& command, std::stringstream& stream);
+    bool RunCommand(const std::string& command);
 
     bool RemoveCommand(const std::string& command);
 

@@ -4,16 +4,13 @@ set(CMAKE_CXX_STANDARD 11)
 
 project(pc_tema3)
 
-include_directories(./External/nlohmann)
-include_directories(./External/laborator10)
+include_directories(Dependencies/nlohmann)
 
 include_directories(./Headers)
 
 include_directories(./Headers/Events)
 
 add_executable(main
-        External/laborator10/buffer.cpp
-        External/laborator10/helpers.cpp
         Sources/main.cpp
         Sources/Session.cpp
         Sources/HttpRequest.cpp

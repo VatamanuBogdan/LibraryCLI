@@ -1,5 +1,4 @@
 #pragma once
-#include <sstream>
 #include "HttpRequest.h"
 
 class Session;
@@ -13,7 +12,7 @@ public:
     : m_Owner(owner){
     }
 
-    virtual void operator()(std::stringstream& stream) = 0;
+    virtual void operator()() = 0;
 };
 
 

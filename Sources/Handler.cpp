@@ -5,10 +5,10 @@ void Handler::AddCommand(const std::string &command, Event* event) {
     m_Commands.insert({command, std::unique_ptr<Event>(event)});
 }
 
-bool Handler::RunCommand(const std::string &command, std::stringstream &stream) {
+bool Handler::RunCommand(const std::string &command) {
     auto handlerIter = m_Commands.find(command);
     if (handlerIter != m_Commands.end()) {
-        (*handlerIter->second)(stream);
+        (*handlerIter->second)();
         return true;
     }
     return false;

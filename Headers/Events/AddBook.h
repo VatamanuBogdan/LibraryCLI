@@ -6,5 +6,5 @@ class AddBook : public Event {
 public:
     explicit AddBook(Session* m_Owner);
 
-    void operator()(std::stringstream& stream) override;
+    void operator()() override;
 };

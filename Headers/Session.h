@@ -9,6 +9,10 @@ private:
 public:
     int GetSockfd() const;
 
+    void OpenConnection();
+
+    void CloseConnection();
+
 private:
     std::string m_UserName;
     std::string m_ConnectSid;

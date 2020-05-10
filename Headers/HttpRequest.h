@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+class Session;
+
 class HttpRequest {
 private:
     std::string m_RequestType;
@@ -10,7 +12,7 @@ private:
     std::string m_Data;
 
 public:
-    void SetRequest(const char* type, const char* path, const char* version);
+    void SetRequest(const char* type, const char* path, const char* version, const char* queryParam = "");
 
     void SetHost(const char* host);
 
@@ -24,7 +26,7 @@ public:
 
     void ClearCookies();
 
-    void Send(int sockfd);
+    void Send(Session& session);
 };
 
 

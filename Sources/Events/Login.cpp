@@ -1,4 +1,4 @@
-#include "Events/Login.h"
+#include "Login.h"
 #include "HttpReply.hpp"
 #include "Connection.hpp"
 #include "json.hpp"
@@ -10,7 +10,7 @@ Login::Login(Session *m_Owner)
     : Event(m_Owner) {
 }
 
-void Login::operator()(std::stringstream &stream) {
+void Login::operator()() {
     using namespace std;
     if (m_Owner->IsConnected()) {
         cout << "You are already connected as " << m_Owner->GetUserName() << endl;
@@ -32,8 +32,10 @@ void Login::operator()(std::stringstream &stream) {
     m_Request.AddHeader("Connection", "keep-alive");
     m_Request.ClearCookies();
     m_Request.SetData(data.c_str());
-    m_Request.Send(m_Owner->GetSockfd());
-    std::string reply = Connection::ReceiveHttps(m_Owner->GetSockfd());
+    m_Owner->OpenConnection();
+    m_Request.Send(*m_Owner);
+    std::string reply = Connection::ReceiveHttps(*m_Owner);
+    m_Owner->CloseConnection();
     unsigned short sign = HttpReply::ExtractSign(reply);
     if (sign == 200) {
         cout << "Login successfully" << std::endl;
